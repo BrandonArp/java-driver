@@ -17,6 +17,11 @@ In 3.1.0, the driver would log a warning the first time it would skip
 a retry for a non-idempotent request; this warning has now been 
 removed as users should now have adjusted their applications accordingly.
 
+[JAVA-1257](https://datastax-oss.atlassian.net/browse/JAVA-1257) deprecates
+`QueryLogger` class in favor of the newly-introduced `EnhancedQueryLogger` class.
+Users are now encouraged to use `EnhancedQueryLogger`.
+`QueryLogger` might be replaced with `EnhancedQueryLogger` in a future major release.
+
 
 ### 3.1.0
 
@@ -131,7 +136,7 @@ We've also seized the opportunity to remove code that was deprecated in 2.1.
       for `null` inputs.
 
 3.  The driver now depends on Guava 16.0.1 (instead of 14.0.1).
-    This update has been mainly motivated by Guava's [Issue #1635](https://github.com/google/guava/issues/1635),
+    This update has been mainly motivated by Guava's [Issue #1635](https://code.google.com/p/guava-libraries/issues/detail?id=1635),
     which affects `TypeToken`, and hence all `TypeCodec` implementations handling parameterized types.
 
 4.  `UDTMapper` (the type previously used to convert `@UDT`-annotated

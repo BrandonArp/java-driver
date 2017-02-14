@@ -17,11 +17,10 @@ In 3.1.0, the driver would log a warning the first time it would skip
 a retry for a non-idempotent request; this warning has now been 
 removed as users should now have adjusted their applications accordingly.
 
-[JAVA-1257](https://datastax-oss.atlassian.net/browse/JAVA-1257) deprecates
-`QueryLogger` class in favor of the newly-introduced `EnhancedQueryLogger` class.
-Users are now encouraged to use `EnhancedQueryLogger`.
-`QueryLogger` might be replaced with `EnhancedQueryLogger` in a future major release.
-
+[JAVA-1257](https://datastax-oss.atlassian.net/browse/JAVA-1257) has deprecated the `QueryLogger`
+class and users are now encouraged to use `EnhancedQueryLogger` instead, which makes it easier for
+users to customize the way statements are logged. 
+Please note that `QueryLogger` class might be removed in a future major release.
 
 [JAVA-1257](https://datastax-oss.atlassian.net/browse/JAVA-1257) also modifies the behavior 
 of `Statement.toString()`. This method now returns more information about the statement 

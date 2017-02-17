@@ -190,7 +190,7 @@ public class StatementFormatterTest {
     @Test(groups = "unit")
     public void should_format_bound_statement() throws Exception {
         StatementFormatter formatter = StatementFormatter.builder().build();
-        BoundStatement statement = newBoundStatementMock("SELECT * FROM t WHERE c1 = ? AND c2 = ? AND c3 = ?");
+        BoundStatement statement = newBoundStatementMock();
         String s = formatter.format(statement, EXTENDED, version, codecRegistry);
         assertThat(s)
                 .contains("BoundStatement@")
@@ -203,7 +203,7 @@ public class StatementFormatterTest {
     public void should_format_batch_statement() throws Exception {
         StatementFormatter formatter = StatementFormatter.builder().build();
         BatchStatement statement = new BatchStatement(BatchStatement.Type.UNLOGGED);
-        Statement inner1 = newBoundStatementMock("SELECT * FROM t WHERE c1 = ? AND c2 = ? AND c3 = ?");
+        Statement inner1 = newBoundStatementMock();
         Statement inner2 = new SimpleStatement("SELECT * FROM t WHERE c1 = ? AND c2 = ?", "foo", 42);
         Statement inner3 = select().from("t").where(eq("c1", "foo")).and(eq("c2", 42));
         statement.add(inner1);
@@ -322,7 +322,7 @@ public class StatementFormatterTest {
                 .withMaxBoundValues(2)
                 .build();
         BatchStatement statement = new BatchStatement(BatchStatement.Type.UNLOGGED);
-        Statement inner1 = newBoundStatementMock("SELECT * FROM t WHERE c1 = ? AND c2 = ? AND c3 = ?");
+        Statement inner1 = newBoundStatementMock();
         Statement inner2 = new SimpleStatement("SELECT * FROM t WHERE c1 = ? AND c2 = ?", "foo", 42);
         Statement inner3 = select().from("t").where(eq("c1", "foo")).and(eq("c2", 42));
         statement.add(inner1);
@@ -451,14 +451,14 @@ public class StatementFormatterTest {
         }
     }
 
-    private BoundStatement newBoundStatementMock(String queryString) {
+    private BoundStatement newBoundStatementMock() {
         PreparedStatement ps = mock(PreparedStatement.class);
         ColumnDefinitions cd = mock(ColumnDefinitions.class);
         PreparedId pid = new PreparedId(null, cd, null, null, version);
         when(ps.getVariables()).thenReturn(cd);
         when(ps.getPreparedId()).thenReturn(pid);
         when(ps.getCodecRegistry()).thenReturn(codecRegistry);
-        when(ps.getQueryString()).thenReturn(queryString);
+        when(ps.getQueryString()).thenReturn("SELECT * FROM t WHERE c1 = ? AND c2 = ? AND c3 = ?");
         when(cd.size()).thenReturn(3);
         when(cd.getName(0)).thenReturn("c1");
         when(cd.getName(1)).thenReturn("c2");

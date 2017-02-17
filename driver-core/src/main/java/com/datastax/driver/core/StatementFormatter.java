@@ -17,14 +17,11 @@ package com.datastax.driver.core;
 
 import com.datastax.driver.core.querybuilder.BuiltStatement;
 import com.datastax.driver.core.schemabuilder.SchemaStatement;
-import com.google.common.base.Throwables;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.datastax.driver.core.StatementFormatter.StatementWriter.*;
 
@@ -208,22 +205,9 @@ public final class StatementFormatter {
     @SuppressWarnings("rawtypes")
     public static final class StatementPrinterRegistry {
 
-        private final LoadingCache<Class<? extends Statement>, StatementPrinter> printers;
+        private final ConcurrentMap<Class<?>, StatementPrinter> printers = new ConcurrentHashMap<Class<?>, StatementPrinter>();
 
         private StatementPrinterRegistry() {
-            printers = CacheBuilder.newBuilder().build(new CacheLoader<Class<? extends Statement>, StatementPrinter>() {
-                @SuppressWarnings({"raw", "unchecked"})
-                @Override
-                public StatementPrinter load(Class key) throws Exception {
-                    StatementPrinter printer = null;
-                    while (printer == null) {
-                        key = key.getSuperclass();
-                        printer = printers.get(key);
-                    }
-                    return printer;
-                }
-            });
-
         }
 
         /**
@@ -236,12 +220,13 @@ public final class StatementFormatter {
          */
         @SuppressWarnings("unchecked")
         public <S extends Statement> StatementPrinter<? super S> findPrinter(S statement) {
-            try {
-                return printers.get(statement.getClass());
-            } catch (ExecutionException e) {
-                // will never happen as long as a default statement printer is registered
-                throw Throwables.propagate(e);
+            StatementPrinter printer = null;
+            Class<?> key = statement.getClass();
+            while (printer == null) {
+                printer = printers.get(key);
+                key = key.getSuperclass();
             }
+            return printer;
         }
 
         private <S extends Statement> void register(StatementPrinter<S> printer) {

@@ -1048,7 +1048,6 @@ public final class StatementFormatter {
          * Build the {@link StatementFormatter} instance.
          *
          * @return the {@link StatementFormatter} instance.
-         * @throws IllegalArgumentException if the builder is unable to build a valid instance due to incorrect settings.
          */
         public StatementFormatter build() {
             StatementPrinterRegistry registry = new StatementPrinterRegistry();

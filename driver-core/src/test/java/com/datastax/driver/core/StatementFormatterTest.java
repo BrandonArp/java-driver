@@ -15,9 +15,14 @@
  */
 package com.datastax.driver.core;
 
+import com.datastax.driver.core.querybuilder.BuiltStatement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.schemabuilder.SchemaBuilder;
+import com.datastax.driver.core.schemabuilder.SchemaStatement;
 import com.datastax.driver.core.utils.Bytes;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.testng.annotations.Test;
 
@@ -415,6 +420,71 @@ public class StatementFormatterTest {
         String s = formatter.format(statement, EXTENDED, version, codecRegistry);
         assertThat(s)
                 .isEqualTo("This is a statement with a QUERY...");
+    }
+
+    @Test(groups = "unit")
+    public void should_override_default_printer_with_concrete_class() throws Exception {
+        SimpleStatement statement = new SimpleStatement("select * from system.local");
+        final String customAppend = "Used custom simple statement formatter";
+        StatementFormatter formatter = StatementFormatter.builder()
+                .addStatementPrinter(new StatementFormatter.StatementPrinter<SimpleStatement>() {
+
+                    @Override
+                    public Class<SimpleStatement> getSupportedStatementClass() {
+                        return SimpleStatement.class;
+                    }
+
+                    @Override
+                    public void print(SimpleStatement statement, StatementFormatter.StatementWriter out, StatementFormatter.StatementFormatVerbosity verbosity) {
+                        out.appendQueryStringFragment(statement.getQueryString());
+                        out.append(", ");
+                        out.append(customAppend);
+                    }
+                })
+                .build();
+
+        String s = formatter.format(statement, EXTENDED, version, codecRegistry);
+        System.out.println(s);
+        assertThat(s)
+                .isEqualTo(statement.getQueryString() + ", " + customAppend);
+
+    }
+
+    @Test(groups = "unit", enabled = false, description = "Does not currently work since default formatters take precedence")
+    public void should_override_default_printer_with_ancestor_class() throws Exception {
+        SimpleStatement simpleStatement = new SimpleStatement("select * from system.local");
+        BuiltStatement builtStatement = QueryBuilder.select().from("system", "peers");
+        SchemaStatement schemaStatement = SchemaBuilder.createTable("x", "y").addPartitionKey("z", DataType.cint());
+        BatchStatement batchStatement = new BatchStatement().add(simpleStatement).add(builtStatement);
+        final String customAppend = "Used custom statement formatter";
+        StatementFormatter formatter = StatementFormatter.builder()
+                .addStatementPrinter(new StatementFormatter.StatementPrinter<RegularStatement>() {
+
+                    @Override
+                    public Class<RegularStatement> getSupportedStatementClass() {
+                        return RegularStatement.class;
+                    }
+
+                    @Override
+                    public void print(RegularStatement statement, StatementFormatter.StatementWriter out, StatementFormatter.StatementFormatVerbosity verbosity) {
+                        out.appendQueryStringFragment(statement.getQueryString());
+                        out.append(", ");
+                        out.append(customAppend);
+                    }
+                })
+                .build();
+
+        // BatchStatement is not a regular statement so it should not be impacted.
+        String s = formatter.format(batchStatement, EXTENDED, version, codecRegistry);
+        assertThat(s).doesNotContain(customAppend);
+
+        for (RegularStatement statement : Lists.newArrayList(simpleStatement, builtStatement, schemaStatement)) {
+            // Should use custom formatter for RegularStatement implementations.
+            s = formatter.format(statement, EXTENDED, version, codecRegistry);
+            assertThat(s)
+                    .isEqualTo(statement.getQueryString() + ", " + customAppend);
+        }
+
     }
 
     // Data types

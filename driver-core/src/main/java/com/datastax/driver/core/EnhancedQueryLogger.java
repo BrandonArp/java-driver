@@ -102,9 +102,9 @@ public abstract class EnhancedQueryLogger implements LatencyTracker {
      * Additionally, if the level is set to {@code TRACE}, then the query parameters (if any)
      * will be logged.
      * <p/>
-     * The name of this logger is {@code com.datastax.driver.core.EnhancedQueryLogger.NORMAL}.
+     * The name of this logger is {@code com.datastax.driver.core.QueryLogger.NORMAL}.
      */
-    public static final Logger NORMAL_LOGGER = LoggerFactory.getLogger("com.datastax.driver.core.EnhancedQueryLogger.NORMAL");
+    public static final Logger NORMAL_LOGGER = LoggerFactory.getLogger("com.datastax.driver.core.QueryLogger.NORMAL");
 
     /**
      * The logger used to log slow queries, i.e., queries that completed successfully
@@ -114,9 +114,9 @@ public abstract class EnhancedQueryLogger implements LatencyTracker {
      * Additionally, if the level is set to {@code TRACE}, then the query parameters (if any)
      * will be logged.
      * <p/>
-     * The name of this logger is {@code com.datastax.driver.core.EnhancedQueryLogger.SLOW}.
+     * The name of this logger is {@code com.datastax.driver.core.QueryLogger.SLOW}.
      */
-    public static final Logger SLOW_LOGGER = LoggerFactory.getLogger("com.datastax.driver.core.EnhancedQueryLogger.SLOW");
+    public static final Logger SLOW_LOGGER = LoggerFactory.getLogger("com.datastax.driver.core.QueryLogger.SLOW");
 
     /**
      * The logger used to log unsuccessful queries, i.e., queries that did not complete normally and threw an exception.
@@ -127,9 +127,9 @@ public abstract class EnhancedQueryLogger implements LatencyTracker {
      * <p/>
      * Note this this logger will also print the full stack trace of the reported exception.
      * <p/>
-     * The name of this logger is {@code com.datastax.driver.core.EnhancedQueryLogger.ERROR}.
+     * The name of this logger is {@code com.datastax.driver.core.QueryLogger.ERROR}.
      */
-    public static final Logger ERROR_LOGGER = LoggerFactory.getLogger("com.datastax.driver.core.EnhancedQueryLogger.ERROR");
+    public static final Logger ERROR_LOGGER = LoggerFactory.getLogger("com.datastax.driver.core.QueryLogger.ERROR");
 
     // Message templates
 
@@ -388,7 +388,7 @@ public abstract class EnhancedQueryLogger implements LatencyTracker {
          * Sets the {@link StatementFormatter formatter} to use
          * to format logged statements.
          * <p/>
-         * If this methods is not called, then the
+         * If this method is not called, then the
          * {@link StatementFormatter#DEFAULT_INSTANCE default formatter}
          * will be used.
          *

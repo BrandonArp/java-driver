@@ -923,11 +923,35 @@ public final class StatementFormatter {
         private Builder() {
         }
 
+        /**
+         * Adds a new {@link StatementPrinter} to the list of available statement
+         * printers.
+         * <p/>
+         * Note that built-in printers are always registered by default and they handle
+         * all the driver built-in {@link Statement} subclasses.
+         * Calling this method is only useful if you need to handle a special
+         * subclass of {@link Statement}; otherwise, the built-in printers should be enough.
+         *
+         * @param printer The {@link StatementPrinter} to add.
+         * @return this (for method chaining).
+         */
         public Builder addStatementPrinter(StatementPrinter<?> printer) {
             printers.add(printer);
             return this;
         }
 
+        /**
+         * Adds the given {@link StatementPrinter}s to the list of available statement
+         * printers.
+         * <p/>
+         * Note that built-in printers are always registered by default and they handle
+         * all the driver built-in {@link Statement} subclasses.
+         * Calling this method is only useful if you need to handle a special
+         * subclass of {@link Statement}; otherwise, the built-in printers should be enough.
+         *
+         * @param printers The {@link StatementPrinter}s to add.
+         * @return this (for method chaining).
+         */
         public Builder addStatementPrinters(StatementPrinter<?>... printers) {
             this.printers.addAll(Arrays.asList(printers));
             return this;
@@ -942,6 +966,7 @@ public final class StatementFormatter {
          *
          * @param maxQueryStringLength the maximum length allowed for query strings.
          * @throws IllegalArgumentException if the value is not > 0, or {@value StatementFormatterLimits#UNLIMITED} (unlimited).
+         * @return this (for method chaining).
          */
         public Builder withMaxQueryStringLength(int maxQueryStringLength) {
             if (maxQueryStringLength <= 0 && maxQueryStringLength != StatementFormatterLimits.UNLIMITED)
@@ -961,6 +986,7 @@ public final class StatementFormatter {
          * @param maxBoundValueLength the maximum length, in numbers of printed characters,
          *                            allowed for a single bound value.
          * @throws IllegalArgumentException if the value is not > 0, or {@value StatementFormatterLimits#UNLIMITED} (unlimited).
+         * @return this (for method chaining).
          */
         public Builder withMaxBoundValueLength(int maxBoundValueLength) {
             if (maxBoundValueLength <= 0 && maxBoundValueLength != StatementFormatterLimits.UNLIMITED)
@@ -978,6 +1004,7 @@ public final class StatementFormatter {
          *
          * @param maxBoundValues the maximum number of printed bound values.
          * @throws IllegalArgumentException if the value is not > 0, or {@value StatementFormatterLimits#UNLIMITED} (unlimited).
+         * @return this (for method chaining).
          */
         public Builder withMaxBoundValues(int maxBoundValues) {
             if (maxBoundValues <= 0 && maxBoundValues != StatementFormatterLimits.UNLIMITED)
@@ -1002,6 +1029,7 @@ public final class StatementFormatter {
          * @param maxInnerStatements the maximum number of printed inner statements
          *                           of a {@link BatchStatement}.
          * @throws IllegalArgumentException if the value is not >= 0, or {@value StatementFormatterLimits#UNLIMITED} (unlimited).
+         * @return this (for method chaining).
          */
         public Builder withMaxInnerStatements(int maxInnerStatements) {
             if (maxInnerStatements < 0 && maxInnerStatements != StatementFormatterLimits.UNLIMITED)
@@ -1019,6 +1047,7 @@ public final class StatementFormatter {
          *
          * @param maxOutgoingPayloadEntries the maximum number of printed outgoing payload entries.
          * @throws IllegalArgumentException if the value is not > 0, or {@value StatementFormatterLimits#UNLIMITED} (unlimited).
+         * @return this (for method chaining).
          */
         public Builder withMaxOutgoingPayloadEntries(int maxOutgoingPayloadEntries) {
             if (maxOutgoingPayloadEntries <= 0 && maxOutgoingPayloadEntries != StatementFormatterLimits.UNLIMITED)
@@ -1036,6 +1065,7 @@ public final class StatementFormatter {
          *
          * @param maxOutgoingPayloadValueLength the maximum length, in bytes, allowed for a single outgoing payload value.
          * @throws IllegalArgumentException if the value is not > 0, or {@value StatementFormatterLimits#UNLIMITED} (unlimited).
+         * @return this (for method chaining).
          */
         public Builder withMaxOutgoingPayloadValueLength(int maxOutgoingPayloadValueLength) {
             if (maxOutgoingPayloadValueLength <= 0 && maxOutgoingPayloadValueLength != StatementFormatterLimits.UNLIMITED)
@@ -1045,7 +1075,7 @@ public final class StatementFormatter {
         }
 
         /**
-         * Build the {@link StatementFormatter} instance.
+         * Builds the {@link StatementFormatter} instance.
          *
          * @return the {@link StatementFormatter} instance.
          */

@@ -700,7 +700,7 @@ public final class StatementFormatter {
             out.append(String.format("idempotent=%s", idempotent == null ? unsetValue : idempotent));
             out.append(listElementSeparator);
             out.append(String.format("CL=%s", consistencyLevel == null ? unsetValue : consistencyLevel));
-            if (verbosity.compareTo(StatementFormatVerbosity.NORMAL) >= 0) {
+            if (verbosity.compareTo(StatementFormatVerbosity.NORMAL) > 0) {
                 ConsistencyLevel serialConsistencyLevel = statement.getSerialConsistencyLevel();
                 long defaultTimestamp = statement.getDefaultTimestamp();
                 int readTimeoutMillis = statement.getReadTimeoutMillis();

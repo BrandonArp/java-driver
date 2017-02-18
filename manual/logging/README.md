@@ -135,16 +135,16 @@ Besides, you can adjust several parameters. Refer to the
 Secondly, you need to adjust your logging framework to accept log messages from the `EnhancedQueryLogger`. The `EnhancedQueryLogger`
 uses 3 different loggers:
 
-* `com.datastax.driver.core.EnhancedQueryLogger.NORMAL` : Used to log normal queries, i.e., queries that completed successfully within a configurable threshold in milliseconds.
-* `com.datastax.driver.core.EnhancedQueryLogger.SLOW` : Used to log slow queries, i.e., queries that completed successfully but that took longer than a configurable threshold in milliseconds to complete.
-* `com.datastax.driver.core.EnhancedQueryLogger.ERROR`: Used to log unsuccessful queries, i.e., queries that did not complete normally and threw an exception. Note this this logger will also print the full stack trace of the reported exception.
+* `com.datastax.driver.core.QueryLogger.NORMAL` : Used to log normal queries, i.e., queries that completed successfully within a configurable threshold in milliseconds.
+* `com.datastax.driver.core.QueryLogger.SLOW` : Used to log slow queries, i.e., queries that completed successfully but that took longer than a configurable threshold in milliseconds to complete.
+* `com.datastax.driver.core.QueryLogger.ERROR`: Used to log unsuccessful queries, i.e., queries that did not complete normally and threw an exception. Note this this logger will also print the full stack trace of the reported exception.
 
 You need to set the above loggers to DEBUG level to turn them on. E.g. to track queries
 that take more than 300 ms to complete, configure your `EnhancedQueryLogger` with that threshold (see above), 
-then set the `com.datastax.driver.core.EnhancedQueryLogger.SLOW` logger to DEBUG, e.g. with Log4J:
+then set the `com.datastax.driver.core.QueryLogger.SLOW` logger to DEBUG, e.g. with Log4J:
 
 ```xml
-  <logger name="com.datastax.driver.core.EnhancedQueryLogger.SLOW">
+  <logger name="com.datastax.driver.core.QueryLogger.SLOW">
     <level value="DEBUG"/>
   </logger>
 ```
@@ -159,7 +159,7 @@ As you can see, actual query parameters are not logged; if you want them to be p
 to TRACE instead, e.g. with Log4J:
 
 ```xml
-  <logger name="com.datastax.driver.core.EnhancedQueryLogger.SLOW">
+  <logger name="com.datastax.driver.core.QueryLogger.SLOW">
     <level value="TRACE"/>
   </logger>
 ```
@@ -234,7 +234,7 @@ It also turns on slow query tracing as described above.
     Turn on slow query logging by setting this logger to DEBUG; 
     set level to TRACE to also log query parameters 
     -->
-    <logger name="com.datastax.driver.core.EnhancedQueryLogger.SLOW" level="DEBUG" />
+    <logger name="com.datastax.driver.core.QueryLogger.SLOW" level="DEBUG" />
 
 	<root level="ERROR">
 		<appender-ref ref="async" />
@@ -285,7 +285,7 @@ It also turns on slow query tracing as described above.
    Turn on slow query logging by setting this logger to DEBUG; 
    set level to TRACE to also log query parameters 
   -->
-  <logger name="com.datastax.driver.core.EnhancedQueryLogger.SLOW">
+  <logger name="com.datastax.driver.core.QueryLogger.SLOW">
     <level value="DEBUG"/>
   </logger>
   

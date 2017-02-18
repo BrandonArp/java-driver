@@ -29,7 +29,16 @@ import static com.datastax.driver.core.StatementFormatter.StatementWriter.*;
 /**
  * A component to format instances of {@link Statement}.
  * <p/>
- * For most users, the {@link #DEFAULT_INSTANCE} should be enough.
+ * Its main method is the {@link #format(Statement, StatementFormatVerbosity, ProtocolVersion, CodecRegistry) format}
+ * method. It can format statements with different levels of verbosity,
+ * which in turn determines which elements to include in the formatted string
+ * (query string, bound values, custom payloads, inner statements for batches, etc.).
+ * <p/>
+ * {@code StatementFormatter} also provides safeguards to prevent overwhelming your logs
+ * with large query strings, queries with considerable amounts of parameters,
+ * batch queries with several inner statements, etc.
+ * <p/>
+ * For most users, the {@link #DEFAULT_INSTANCE} should be just fine.
  * However, {@code StatementFormatter} is fully customizable.
  * To build a customized formatter, use the {@link #builder()} method
  * as follows:

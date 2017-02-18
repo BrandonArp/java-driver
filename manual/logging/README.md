@@ -152,11 +152,11 @@ then set the `com.datastax.driver.core.QueryLogger.SLOW` logger to DEBUG, e.g. w
 The `EnhancedQueryLogger` would then print messages such as this for every slow query:
 
 ```
-DEBUG [cluster1] [/127.0.0.1:9042] Query too slow, took 329 ms: SELECT * FROM users WHERE user_id=?;
+DEBUG [cluster1] [/127.0.0.1:9042] Query too slow, took 329 ms: BoundStatement@2a929abf [idempotent=<UNSET>, CL=<UNSET>, 1 bound values]: SELECT * FROM users WHERE user_id=?;
 ```
 
-As you can see, actual query parameters are not logged; if you want them to be printed as well, set the `com.datastax.driver.core.EnhancedQueryLogger.SLOW` logger
-to TRACE instead, e.g. with Log4J:
+As you can see, the query string is logged but actual bound values are not; if you want them to be logged as well, 
+set the `com.datastax.driver.core.QueryLogger.SLOW` logger to TRACE instead, e.g. with Log4J:
 
 ```xml
   <logger name="com.datastax.driver.core.QueryLogger.SLOW">
@@ -164,14 +164,30 @@ to TRACE instead, e.g. with Log4J:
   </logger>
 ```
 
-The `EnhancedQueryLogger` would then print messages such as this for every slow query:
+At this level, the `EnhancedQueryLogger` prints statements with maximum verbosity; 
+it would then print messages such as this for every slow query:
 
 ```
-TRACE [cluster1] [/127.0.0.1:9042] Query too slow, took 329 ms: SELECT * FROM users WHERE user_id=? [user_id=42];
+TRACE [cluster1] [/127.0.0.1:9042] Query too slow, took 329 ms: BoundStatement@34d2ff60 [idempotent=<UNSET>, CL=<UNSET>, SCL=<UNSET>, defaultTimestamp=<UNSET>, readTimeoutMillis=<UNSET>, 1 bound values]: SELECT * FROM users WHERE user_id=? { user_id : 42 }
+
 ```
 
-Be careful when logging large query strings (specially batches) and/or queries with considerable amounts of parameters. 
-See the `EnhancedQueryLogger` [API docs][query_logger] for examples of how to truncate the printed message when necessary.
+#### Formatting statements
+
+The `EnhancedQueryLogger` uses another component, namely the `StatementFormatter` class, 
+to actually format and print executed statements.
+ 
+`StatementFormatter` can format statements with different levels of verbosity, 
+which in turn determines which elements to include in the formatted string 
+(query string, bound values, custom payloads, inner statements for batches, etc.). 
+
+`StatementFormatter` also provides safeguards to prevent overwhelming your logs with large query strings, 
+queries with considerable amounts of parameters, batch queries with several inner statements, etc. 
+
+And finally, `StatementFormatter` also allows you to implement your own formatting rules, should you need full control
+over what needs to be formatted and how.
+
+See the `StatementFormatter` [API docs][statement_formatter] for guidelines about how to customize `StatementFormatter`.
 
 #### Constant vs Dynamic thresholds
 
@@ -298,3 +314,4 @@ It also turns on slow query tracing as described above.
 ```
 
 [query_logger]:http://docs.datastax.com/en/drivers/java/3.0/com/datastax/driver/core/EnhancedQueryLogger.html
+[statement_formatter]:http://docs.datastax.com/en/drivers/java/3.0/com/datastax/driver/core/StatementFormatter.html

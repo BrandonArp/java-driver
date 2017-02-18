@@ -27,10 +27,43 @@ import java.util.concurrent.ConcurrentMap;
 import static com.datastax.driver.core.StatementFormatter.StatementWriter.*;
 
 /**
- * A customizable component to format instances of {@link Statement}.
+ * A component to format instances of {@link Statement}.
  * <p/>
- * Instances of {@link StatementFormatter} can be obtained
- * through the {@link #builder()} method.
+ * For most users, the {@link #DEFAULT_INSTANCE} should be enough.
+ * However, {@code StatementFormatter} is fully customizable.
+ * To build a customized formatter, use the {@link #builder()} method
+ * as follows:
+ * <pre>{@code
+ * StatementFormatter formatter = StatementFormatter.builder()
+ *      // customize formatter settings
+ *      .withMaxBoundValues(42)
+ *      .build()
+ * }</pre>
+ * It is also possible to take full control over how a specific kind
+ * of statement should be formatted.
+ * To do this, simply implement a {@link StatementPrinter StatementPrinter}:
+ * <pre>{@code
+ * class MyCustomStatement extends StatementWrapper {...}
+ *
+ * class MyCustomStatementPrinter implements StatementPrinter<MyCustomStatement> {
+ *      public Class<MyCustomStatement> getSupportedStatementClass() {
+ *           return MyCustomStatement.class;
+ *      }
+ *      public void print(CustomStatement statement, StatementWriter out, StatementFormatVerbosity verbosity) {
+ *           // go crazy
+ *      }
+ * }
+ * }</pre>
+ * Then add it to the resulting formatter as follows:
+ * <pre>{@code
+ * StatementFormatter formatter = StatementFormatter.builder()
+ *      .addStatementPrinter(new MyCustomStatementPrinter())
+ *      .build()
+ * }</pre>
+ * The driver ships with a set of printers that handle
+ * all the built-in statement types. It is possible to completely override them
+ * by simply providing a {@code StatementPrinter} for the type of
+ * {@code Statement} that you wish to override, using the same method outlined above.
  * <p/>
  * Instances of this class are thread-safe.
  */

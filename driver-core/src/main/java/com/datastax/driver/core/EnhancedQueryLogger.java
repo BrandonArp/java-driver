@@ -23,14 +23,13 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 /**
  * A configurable {@link LatencyTracker} that logs all executed statements.
  * <p/>
- * Typically, client applications would instantiate one single query logger (using its {@link Builder}),
+ * Typically, client applications would instantiate one single query logger (using its {@link Builder builder}),
  * configure it and register it on the relevant {@link Cluster} instance, e.g.:
  * <p/>
  * <pre>
  * Cluster cluster = ...
  * EnhancedQueryLogger queryLogger = EnhancedQueryLogger.builder()
  *     .withConstantThreshold(...)
- *     .withMaxQueryStringLength(...)
  *     .build();
  * cluster.register(queryLogger);
  * </pre>

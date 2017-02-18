@@ -450,12 +450,12 @@ public class StatementFormatterTest {
 
     }
 
-    @Test(groups = "unit", enabled = false, description = "Does not currently work since default formatters take precedence")
+    @Test(groups = "unit")
     public void should_override_default_printer_with_ancestor_class() throws Exception {
         SimpleStatement simpleStatement = new SimpleStatement("select * from system.local");
         BuiltStatement builtStatement = QueryBuilder.select().from("system", "peers");
         SchemaStatement schemaStatement = SchemaBuilder.createTable("x", "y").addPartitionKey("z", DataType.cint());
-        BatchStatement batchStatement = new BatchStatement().add(simpleStatement).add(builtStatement);
+        BatchStatement batchStatement = new BatchStatement();
         final String customAppend = "Used custom statement formatter";
         StatementFormatter formatter = StatementFormatter.builder()
                 .addStatementPrinter(new StatementFormatter.StatementPrinter<RegularStatement>() {

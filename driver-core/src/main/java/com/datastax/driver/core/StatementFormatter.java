@@ -17,6 +17,7 @@ package com.datastax.driver.core;
 
 import com.datastax.driver.core.querybuilder.BuiltStatement;
 import com.datastax.driver.core.schemabuilder.SchemaStatement;
+import com.google.common.collect.ImmutableMap;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -202,10 +203,22 @@ public final class StatementFormatter {
      * <p/>
      * This class is thread-safe.
      */
-    @SuppressWarnings("rawtypes")
     public static final class StatementPrinterRegistry {
 
-        private final ConcurrentMap<Class<?>, StatementPrinter> printers = new ConcurrentHashMap<Class<?>, StatementPrinter>();
+        private static final Map<Class<?>, StatementPrinter<?>> BUILT_IN_PRINTERS =
+                ImmutableMap.<Class<?>, StatementPrinter<?>>builder()
+                        .put(Statement.class, new DefaultStatementPrinter())
+                        .put(SimpleStatement.class, new SimpleStatementPrinter())
+                        .put(RegularStatement.class, new RegularStatementPrinter())
+                        .put(BuiltStatement.class, new BuiltStatementPrinter())
+                        .put(SchemaStatement.class, new SchemaStatementPrinter())
+                        .put(BoundStatement.class, new BoundStatementPrinter())
+                        .put(BatchStatement.class, new BatchStatementPrinter())
+                        .put(StatementWrapper.class, new StatementWrapperPrinter())
+                        .build();
+
+        private final ConcurrentMap<Class<?>, StatementPrinter<?>> printers =
+                new ConcurrentHashMap<Class<?>, StatementPrinter<?>>();
 
         private StatementPrinterRegistry() {
         }
@@ -213,6 +226,10 @@ public final class StatementFormatter {
         /**
          * Attempts to locate the best {@link StatementPrinter printer} for the given
          * statement.
+         * <p/>
+         * The registry first tries to locate a user-defined printer that is capable of
+         * printing the given statement; if none is found, then built-in printers
+         * will be used.
          *
          * @param statement The statement find a printer for.
          * @return The best {@link StatementPrinter printer} for the given
@@ -220,11 +237,17 @@ public final class StatementFormatter {
          */
         @SuppressWarnings("unchecked")
         public <S extends Statement> StatementPrinter<? super S> findPrinter(S statement) {
-            StatementPrinter printer = null;
-            Class<?> key = statement.getClass();
-            while (printer == null) {
-                printer = printers.get(key);
-                key = key.getSuperclass();
+            StatementPrinter<?> printer = lookupPrinter(statement, printers);
+            if (printer == null)
+                printer = lookupPrinter(statement, BUILT_IN_PRINTERS);
+            assert printer != null;
+            return (StatementPrinter<? super S>) printer;
+        }
+
+        private static StatementPrinter<?> lookupPrinter(Statement statement, Map<Class<?>, StatementPrinter<?>> map) {
+            StatementPrinter<?> printer = null;
+            for (Class<?> key = statement.getClass(); printer == null && key != null; key = key.getSuperclass()) {
+                printer = map.get(key);
             }
             return printer;
         }
@@ -927,10 +950,13 @@ public final class StatementFormatter {
          * Adds a new {@link StatementPrinter} to the list of available statement
          * printers.
          * <p/>
-         * Note that built-in printers are always registered by default and they handle
+         * Note that built-in printers handle
          * all the driver built-in {@link Statement} subclasses.
          * Calling this method is only useful if you need to handle a special
-         * subclass of {@link Statement}; otherwise, the built-in printers should be enough.
+         * subclass of {@link Statement}.
+         * <p/>
+         * Also note that registering two or more printers for the
+         * same kind of statement will result in the last one being used.
          *
          * @param printer The {@link StatementPrinter} to add.
          * @return this (for method chaining).
@@ -1081,24 +1107,12 @@ public final class StatementFormatter {
          */
         public StatementFormatter build() {
             StatementPrinterRegistry registry = new StatementPrinterRegistry();
-            registerDefaultPrinters(registry);
             for (StatementPrinter<?> printer : printers) {
                 registry.register(printer);
             }
             StatementFormatterLimits limits = new StatementFormatterLimits(
                     maxQueryStringLength, maxBoundValueLength, maxBoundValues, maxInnerStatements, maxOutgoingPayloadEntries, maxOutgoingPayloadValueLength);
             return new StatementFormatter(registry, limits);
-        }
-
-        private void registerDefaultPrinters(StatementPrinterRegistry registry) {
-            registry.register(new DefaultStatementPrinter());
-            registry.register(new SimpleStatementPrinter());
-            registry.register(new RegularStatementPrinter());
-            registry.register(new BuiltStatementPrinter());
-            registry.register(new SchemaStatementPrinter());
-            registry.register(new BoundStatementPrinter());
-            registry.register(new BatchStatementPrinter());
-            registry.register(new StatementWrapperPrinter());
         }
 
     }
@@ -1129,7 +1143,7 @@ public final class StatementFormatter {
             assert printer != null : "Could not find printer for statement class " + statement.getClass();
             StatementWriter out = new StatementWriter(new StringBuilder(), printerRegistry, limits, protocolVersion, codecRegistry);
             printer.print(statement, out, verbosity);
-            return out.toString().trim();
+            return out.toString();
         } catch (RuntimeException e) {
             throw new StatementFormatException(statement, verbosity, protocolVersion, codecRegistry, e);
         }
